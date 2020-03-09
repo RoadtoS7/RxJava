@@ -26,7 +26,7 @@ public class FirstExample {
 	}
 	
 		public static void main(String[] args) {
-			Zip.run();
+			Zip.ex2();
 	}
 }
 
