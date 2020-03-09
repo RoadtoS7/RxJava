@@ -3,7 +3,10 @@ package ch4_3;
 import java.text.DecimalFormat;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import CommonUtils.Shape;
+import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Observable;
 import reactivejava.CommonUtils;
 import reactivejava.Log;
@@ -46,6 +49,8 @@ public class Zip {
 	}
 	
 	public static void ex3() {
+		int index = 0;
+		
 		String[] data = {
 				"100",
 				"300"
@@ -83,10 +88,43 @@ public class Zip {
 			sb.append("Price: " + val + "원");
 			Log.i(sb.toString());
 			
-			index++; // 부수효과
-		});
+//			index++; // 부수효과
+		});			
+	}
+	
+	public static void ex4() {
+		String[] data = {
+			"100",
+			"300"
+		};
 		
+		Observable<Integer> basePrice = Observable.fromArray(data)
+				.map(Integer::parseInt)
+				.map(val ->{
+					if(val <= 200) return 910;
+					if(val <= 400) return 1600;
+					return 7300;
+				});
+		
+		Observable<Integer> usagePrice = Observable.fromArray(data)
+				.map(Integer::parseInt)
+				.map(val ->{
+					double series1 = Math.min(200, val - 200) * 93.3;
+					double series2 = Math.min(200, Math.max(val - 200, 0)) * 187.9;
+					double series3 = Math.max(0, Math.max(val - 400, 0)) * 280.6;
+					
+					return (int)(series1 + series2 + series3);
+				});
+		
+
+		@NonNull Observable<Object> source = Observable.zip(
+				basePrice, 
+				usagePrice,
+				Observable.fromArray(data),
+				(v1, v2, i) -> Pair.of(i, v1+v2));
 				
 	}
+	
+	
 	
 }
